@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🛡️ CyberShield — Password Security Analyzer</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+<style>
+:root{--bg-primary:#050a0f;--bg-secondary:#0a1628;--bg-card:rgba(10,22,40,0.75);--neon-green:#00ff88;--neon-cyan:#00d4ff;--neon-purple:#b347ff;--neon-orange:#ff6b35;--neon-gold:#ffd700;--text-primary:#e8f4fd;--text-muted:#7a9ab5;--border-glass:rgba(0,255,136,0.15);--border-hover:rgba(0,255,136,0.4);--font-display:'Orbitron',sans-serif;--font-mono:'Share Tech Mono',monospace;--font-body:'Inter',sans-serif;--radius-card:16px;--shadow-neon:0 0 30px rgba(0,255,136,0.15);--shadow-card:0 8px 32px rgba(0,0,0,0.5);--transition:0.3s cubic-bezier(0.4,0,0.2,1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg-primary);color:var(--text-primary);overflow-x:hidden;min-height:100vh}
+.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,255,136,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.03) 1px,transparent 1px);background-size:50px 50px;animation:grid-drift 20s linear infinite;pointer-events:none}
+@keyframes grid-drift{0%{transform:translateY(0)}100%{transform:translateY(50px)}}
+#particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.neon-green{color:var(--neon-green)!important}.neon-cyan{color:var(--neon-cyan)!important}.neon-purple{color:var(--neon-purple)!important}.text-muted-light{color:var(--text-muted)}
+/* NAVBAR */
+.cs-navbar{background:rgba(5,10,15,0.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-glass);padding:.75rem 0;z-index:1000;transition:var(--transition)}
+.brand-text{font-family:var(--font-display);font-weight:700;font-size:1.15rem;color:var(--text-primary);letter-spacing:2px}
+.nav-link{color:var(--text-muted)!important;font-size:.9rem;transition:var(--transition);padding:.4rem .8rem!important}
+.nav-link:hover{color:var(--neon-green)!important}
+/* BUTTONS */
+.cs-btn-primary{background:linear-gradient(135deg,var(--neon-green),#00cc70);color:#000!important;font-family:var(--font-display);font-weight:700;font-size:.78rem;letter-spacing:1px;border:none;border-radius:8px;padding:.55rem 1.4rem;transition:var(--transition);text-decoration:none;display:inline-flex;align-items:center}
+.cs-btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 25px rgba(0,255,136,.5)}
+.cs-btn-outline{background:transparent;color:var(--neon-green)!important;border:1px solid var(--neon-green);font-family:var(--font-display);font-weight:700;font-size:.78rem;letter-spacing:1px;border-radius:8px;padding:.55rem 1.4rem;transition:var(--transition);text-decoration:none;display:inline-flex;align-items:center}
+.cs-btn-outline:hover{background:rgba(0,255,136,.1);transform:translateY(-2px)}
+/* GLASS CARD */
+.glass-card{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:var(--radius-card);backdrop-filter:blur(20px);box-shadow:var(--shadow-card);position:relative;z-index:1;transition:var(--transition)}
+.glass-card:hover{border-color:var(--border-hover)}
+/* FORM */
+.cs-label{color:var(--text-muted);font-size:.78rem;font-family:var(--font-mono);letter-spacing:1px;text-transform:uppercase}
+.cs-input{background:rgba(5,10,20,.8)!important;border:1px solid var(--border-glass)!important;color:var(--text-primary)!important;border-radius:8px!important;font-family:var(--font-mono);transition:var(--transition)}
+.cs-input:focus{border-color:var(--neon-green)!important;box-shadow:0 0 0 3px rgba(0,255,136,.1)!important}
+.cs-input::placeholder{color:rgba(122,154,181,.5)!important}
+/* SECTIONS */
+.section-eyebrow{font-family:var(--font-mono);font-size:.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--neon-green);display:inline-block;padding:4px 12px;border:1px solid rgba(0,255,136,.3);border-radius:4px}
+.section-title{font-family:var(--font-display);font-size:clamp(1.7rem,3vw,2.4rem);font-weight:700;color:var(--text-primary);line-height:1.2;margin-top:.75rem}
+.section-subtitle{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
+/* HERO */
+.hero-section{position:relative;z-index:1;padding-top:80px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.25);border-radius:50px;padding:6px 16px;font-size:.78rem;color:var(--neon-green);font-family:var(--font-mono)}
+.badge-dot{width:8px;height:8px;background:var(--neon-green);border-radius:50%;animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.hero-title{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.8rem);font-weight:900;line-height:1.1;color:var(--text-primary);margin-bottom:1.5rem}
+.glitch{position:relative;display:inline-block}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%}
+.glitch::before{color:var(--neon-cyan);animation:glitch-1 3s infinite;clip-path:polygon(0 0,100% 0,100% 33%,0 33%)}
+.glitch::after{color:var(--neon-purple);animation:glitch-2 3s infinite;clip-path:polygon(0 66%,100% 66%,100% 100%,0 100%)}
+@keyframes glitch-1{0%,90%,100%{transform:translate(0)}92%{transform:translate(-3px,1px)}94%{transform:translate(3px,-1px)}}
+@keyframes glitch-2{0%,90%,100%{transform:translate(0)}92%{transform:translate(3px,1px)}94%{transform:translate(-3px,-1px)}}
+.hero-subtitle{font-size:1rem;color:var(--text-muted);line-height:1.7;max-width:520px;margin-bottom:2rem}
+.stat-card{background:rgba(10,22,40,.6);border:1px solid var(--border-glass);border-radius:12px;padding:1rem;text-align:center;transition:var(--transition)}
+.stat-card:hover{border-color:var(--border-hover);transform:translateY(-3px)}
+.stat-num{font-family:var(--font-display);font-size:1.6rem;font-weight:900;line-height:1}
+.stat-plus{font-size:1rem}
+.stat-label{font-size:.68rem;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+/* SHIELD ANIMATION */
+.hero-visual{position:relative;width:380px;height:380px}
+.shield-3d{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.shield-outer{width:200px;height:200px;border:2px solid rgba(0,255,136,.3);border-radius:50%;animation:rotate-slow 20s linear infinite;display:flex;align-items:center;justify-content:center}
+.shield-inner{width:150px;height:150px;border:2px solid rgba(0,212,255,.3);border-radius:50%;animation:rotate-slow 15s linear infinite reverse;display:flex;align-items:center;justify-content:center;position:relative}
+.shield-core{width:80px;height:80px;background:radial-gradient(circle,rgba(0,255,136,.2),rgba(0,255,136,.05));border:2px solid var(--neon-green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--neon-green);box-shadow:0 0 30px rgba(0,255,136,.3),inset 0 0 20px rgba(0,255,136,.1)}
+.orbit{position:absolute;border-radius:50%;border:1px dashed rgba(0,255,136,.2)}
+.orbit-1{width:170px;height:170px;animation:rotate-slow 8s linear infinite}
+.orbit-2{width:130px;height:130px;animation:rotate-slow 5s linear infinite reverse}
+.orbit-3{width:100px;height:100px;animation:rotate-slow 12s linear infinite}
+.orbit-dot{width:8px;height:8px;background:var(--neon-green);border-radius:50%;position:absolute;top:-4px;left:50%;transform:translateX(-50%);box-shadow:0 0 10px var(--neon-green)}
+@keyframes rotate-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.float-card{position:absolute;background:rgba(10,22,40,.88);border:1px solid var(--border-glass);border-radius:10px;padding:8px 14px;font-family:var(--font-mono);font-size:.72rem;color:var(--text-primary);display:flex;align-items:center;gap:8px;backdrop-filter:blur(10px);white-space:nowrap}
+.fc-1{top:25px;right:-10px;animation:float 3s ease-in-out infinite}
+.fc-2{bottom:75px;right:-20px;animation:float 3s ease-in-out infinite 1s}
+.fc-3{top:120px;left:-10px;animation:float 3s ease-in-out infinite .5s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+/* FEATURES */
+.features-section{position:relative;z-index:1;background:linear-gradient(180deg,transparent,rgba(0,255,136,.02),transparent)}
+.feature-card{background:var(--bg-card);border:1px solid var(--border-glass);border-radius:var(--radius-card);padding:1.8rem 1.4rem;height:100%;transition:var(--transition);position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--icon-color,var(--neon-green)),transparent);opacity:0;transition:var(--transition)}
+.feature-card:hover{border-color:var(--border-hover);transform:translateY(-5px);box-shadow:0 20px 40px rgba(0,0,0,.4)}
+.feature-card:hover::before{opacity:1}
+.feature-icon{font-size:2rem;color:var(--icon-color,var(--neon-green));margin-bottom:.9rem;display:block}
+.feature-title{font-family:var(--font-display);font-size:.92rem;font-weight:700;color:var(--text-primary);margin-bottom:.4rem}
+.feature-desc{font-size:.84rem;color:var(--text-muted);line-height:1.6;margin-bottom:.9rem}
+.feature-tag{display:inline-block;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);color:var(--neon-green);font-size:.67rem;font-family:var(--font-mono);padding:3px 10px;border-radius:4px;letter-spacing:1px}
+/* HOW IT WORKS */
+.how-section{position:relative;z-index:1}
+.timeline{display:flex;flex-direction:column;gap:0}
+.timeline-item{display:flex;align-items:flex-start;gap:1.5rem;padding:1.5rem 0 1.5rem 2.5rem;border-left:2px solid rgba(0,255,136,.2);position:relative}
+.timeline-item:last-child{border-left-color:transparent}
+.timeline-num{position:absolute;left:-1.15rem;top:1.5rem;width:2.3rem;height:2.3rem;background:var(--bg-primary);border:2px solid var(--neon-green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:.72rem;color:var(--neon-green)}
+.timeline-content h4{font-family:var(--font-display);font-size:.95rem;color:var(--text-primary);margin-bottom:.4rem}
+.timeline-content p{font-size:.84rem;color:var(--text-muted);line-height:1.6}
+/* TERMINAL */
+.about-section{position:relative;z-index:1}
+.tech-stack{display:flex;flex-wrap:wrap;gap:8px}
+.tech-badge{background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);color:var(--neon-cyan);font-family:var(--font-mono);font-size:.72rem;padding:5px 12px;border-radius:6px;transition:var(--transition)}
+.tech-badge:hover{background:rgba(0,212,255,.15);transform:translateY(-2px)}
+.about-terminal{background:rgba(2,6,12,.96);border:1px solid rgba(0,255,136,.25);border-radius:12px;overflow:hidden;font-family:var(--font-mono);box-shadow:0 0 40px rgba(0,255,136,.1)}
+.terminal-bar{background:rgba(0,255,136,.05);border-bottom:1px solid rgba(0,255,136,.15);padding:10px 16px;display:flex;align-items:center;gap:8px}
+.t-dot{width:12px;height:12px;border-radius:50%}
+.t-dot.red{background:#ff5f56}.t-dot.yellow{background:#ffbd2e}.t-dot.green{background:#27c93f}
+.t-title{margin-left:8px;font-size:.72rem;color:var(--text-muted)}
+.terminal-body{padding:1.2rem;font-size:.78rem;line-height:2}
+.t-prompt{color:var(--neon-green);margin-right:8px}.t-cmd{color:var(--text-primary)}.t-info{color:var(--neon-cyan)}.t-success{color:var(--neon-green)}.t-cursor{display:inline-block;color:var(--neon-green);animation:blink 1s infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+/* CTA */
+.cta-section{position:relative;z-index:1}
+.cta-card{background:linear-gradient(135deg,rgba(0,255,136,.06),rgba(0,212,255,.06));border:1px solid rgba(0,255,136,.25);border-radius:20px;padding:3rem 2rem}
+.cta-title{font-family:var(--font-display);font-size:1.9rem;color:var(--text-primary)}
+.cta-subtitle{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
+/* CONTACT */
+.contact-section{position:relative;z-index:1}
+/* FOOTER */
+.cs-footer{background:rgba(5,10,15,.96);border-top:1px solid var(--border-glass);position:relative;z-index:1}
+.footer-sub{font-size:.77rem;color:var(--text-muted);font-family:var(--font-mono)}
+.navbar-toggler{border:1px solid var(--border-glass)!important;padding:4px 8px}
+.navbar-toggler:focus{box-shadow:none!important}
+/* ANALYZER PAGE */
+.analyzer-wrapper{position:relative;z-index:1;padding-top:90px;padding-bottom:40px;min-height:100vh}
+.analyzer-page-title{font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.2rem);font-weight:900;color:var(--text-primary);letter-spacing:2px}
+.analyzer-page-sub{color:var(--text-muted);font-size:.92rem;margin-top:.4rem}
+.nav-badge{font-family:var(--font-mono);font-size:.72rem;color:var(--neon-green);background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);border-radius:20px;padding:4px 12px}
+.password-input-group{display:flex;gap:8px;align-items:center}
+.cs-input-lg{font-size:1.05rem!important;padding:.7rem 1rem!important;letter-spacing:3px;flex:1}
+.cs-btn-icon{background:rgba(0,255,136,.08);border:1px solid var(--border-glass);color:var(--text-muted);border-radius:8px;padding:.6rem .9rem;transition:var(--transition);flex-shrink:0}
+.cs-btn-icon:hover{color:var(--neon-green);border-color:var(--neon-green)}
+.privacy-note{font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted)}
+.cs-btn-ghost{background:transparent;color:var(--text-muted);border:1px solid rgba(122,154,181,.3);border-radius:6px;font-size:.78rem;transition:var(--transition)}
+.cs-btn-ghost:hover{color:var(--text-primary);border-color:var(--text-muted)}
+.cs-meter-track{height:12px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden;border:1px solid var(--border-glass)}
+.cs-meter-fill{height:100%;border-radius:10px;transition:width .6s cubic-bezier(.4,0,.2,1),background .4s ease;background:linear-gradient(90deg,#ff4444,#ff8800,#00ff88)}
+.meter-ticks{display:flex;justify-content:space-between;margin-top:6px;font-family:var(--font-mono);font-size:.63rem;color:var(--text-muted)}
+.strength-label-badge{font-family:var(--font-display);font-size:.78rem;font-weight:700;padding:4px 14px;border-radius:6px;letter-spacing:1px}
+.metric-card{transition:var(--transition);cursor:default}
+.metric-card:hover{transform:translateY(-4px)}
+.metric-icon{font-size:1.5rem;margin-bottom:.4rem}
+.metric-label{font-family:var(--font-mono);font-size:.62rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:.3rem}
+.metric-value{font-family:var(--font-display);font-size:2rem;font-weight:900;line-height:1}
+.metric-sub{font-family:var(--font-mono);font-size:.67rem;color:var(--text-muted);margin-top:4px}
+.grade-display{font-family:var(--font-display);font-size:2.8rem;font-weight:900;line-height:1}
+.card-section-title{font-family:var(--font-display);font-size:.82rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-primary);display:flex;align-items:center}
+.radar-container{position:relative;width:100%;max-width:280px;margin:0 auto}
+.char-analysis{display:flex;flex-direction:column;gap:14px}
+.char-row{display:flex;align-items:center;gap:12px}
+.char-type{font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted);width:95px;flex-shrink:0;display:flex;align-items:center;gap:6px}
+.char-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden}
+.char-bar{height:100%;border-radius:6px;width:0%;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.char-count{font-family:var(--font-display);font-size:.82rem;font-weight:700;color:var(--text-primary);width:22px;text-align:right}
+.info-box{background:rgba(0,0,0,.3);border:1px solid var(--border-glass);border-radius:8px}
+.cs-label-sm{font-family:var(--font-mono);font-size:.68rem;color:var(--text-muted);letter-spacing:.5px}
+.crack-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.crack-item{background:rgba(0,0,0,.3);border:1px solid var(--border-glass);border-radius:10px;padding:12px;transition:var(--transition)}
+.crack-item:hover{border-color:var(--border-hover)}
+.crack-attack{font-family:var(--font-mono);font-size:.68rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.crack-desc{font-size:.62rem;color:rgba(122,154,181,.5);font-family:var(--font-mono);margin-bottom:6px}
+.crack-time{font-family:var(--font-display);font-size:.88rem;font-weight:700;color:var(--neon-orange);word-break:break-word}
+.entropy-formula{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.2);border-radius:10px}
+.formula-title{font-family:var(--font-mono);font-size:.63rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.formula-text{font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--neon-cyan);margin-bottom:4px}
+.formula-desc{font-family:var(--font-mono);font-size:.63rem;color:var(--text-muted)}
+.entropy-breakdown{display:flex;flex-direction:column;gap:8px}
+.eb-row{display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.05);font-family:var(--font-mono);font-size:.76rem;color:var(--text-muted)}
+.eb-row:last-child{border-bottom:none}
+.risk-badge{font-family:var(--font-mono);font-size:.68rem;padding:2px 8px;border-radius:4px;font-weight:700}
+.checks-list,.recs-list{display:flex;flex-direction:column;gap:8px}
+.check-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:rgba(0,0,0,.2);border:1px solid transparent;font-family:var(--font-mono);font-size:.76rem;animation:slide-in .3s ease forwards}
+.check-item.pass{border-color:rgba(0,255,136,.2);color:var(--text-primary)}
+.check-item.fail{border-color:rgba(255,68,68,.2);color:var(--text-muted)}
+.check-icon{font-size:.95rem;flex-shrink:0}
+.check-icon.pass{color:var(--neon-green)}.check-icon.fail{color:#ff4444}
+@keyframes slide-in{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.rec-item{display:flex;align-items:flex-start;gap:10px;padding:11px;border-radius:8px;background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.15);font-size:.8rem;color:var(--text-primary);line-height:1.5;animation:slide-in .3s ease forwards}
+.rec-icon{color:var(--neon-gold);font-size:.88rem;flex-shrink:0;margin-top:2px}
+#emptyState{position:relative;z-index:1}
+.empty-shield{font-size:5rem;opacity:.25;animation:float 3s ease-in-out infinite}
+@media(max-width:768px){.hero-title{font-size:2rem}.hero-section{padding-top:100px}.float-card{display:none}.navbar-collapse{background:rgba(5,10,15,.98);border-radius:12px;padding:1rem;margin-top:.5rem}.password-input-group{flex-wrap:wrap}.crack-grid{grid-template-columns:1fr}.metric-value{font-size:1.5rem}.analyzer-wrapper{padding-top:80px}}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<canvas id="particle-canvas"></canvas>
+
+<!-- ═══ PAGE ROUTER ═══ -->
+<div id="page-landing">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg cs-navbar fixed-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="#" onclick="showPage('landing')">
+      <span style="font-size:1.3rem">🛡️</span>
+      <span class="brand-text">Cyber<span class="neon-green">Shield</span></span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <i class="bi bi-list text-white fs-4"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto gap-2 align-items-center">
+        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+        <li class="nav-item"><a class="nav-link" href="#how-it-works">How It Works</a></li>
+        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+        <li class="nav-item">
+          <button class="btn cs-btn-primary" onclick="showPage('analyzer')">
+            <i class="bi bi-shield-lock-fill me-1"></i>Analyze Password
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-section" id="home">
+  <div class="container">
+    <div class="row align-items-center min-vh-100">
+      <div class="col-lg-7">
+        <div class="hero-badge mb-4"><span class="badge-dot"></span><span>Advanced Cybersecurity Analysis Engine</span></div>
+        <h1 class="hero-title">Is Your Password<br/><span class="neon-green glitch" data-text="TRULY SECURE?">TRULY SECURE?</span></h1>
+        <p class="hero-subtitle">CyberShield uses military-grade entropy analysis, dictionary attack simulation, and vulnerability detection to give you a complete security assessment in real time.</p>
+        <div class="row g-3 mb-5">
+          <div class="col-4"><div class="stat-card"><div class="stat-num neon-green">128<span class="stat-plus">+</span></div><div class="stat-label">Security Checks</div></div></div>
+          <div class="col-4"><div class="stat-card"><div class="stat-num neon-cyan">10M<span class="stat-plus">+</span></div><div class="stat-label">Password DB</div></div></div>
+          <div class="col-4"><div class="stat-card"><div class="stat-num neon-purple">0ms</div><div class="stat-label">Analysis Time</div></div></div>
+        </div>
+        <div class="d-flex gap-3 flex-wrap">
+          <button onclick="showPage('analyzer')" class="btn cs-btn-primary btn-lg"><i class="bi bi-shield-lock-fill me-2"></i>Analyze My Password</button>
+          <a href="#how-it-works" class="btn cs-btn-outline btn-lg"><i class="bi bi-play-circle me-2"></i>How It Works</a>
+        </div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+        <div class="hero-visual">
+          <div class="shield-3d">
+            <div class="shield-outer"><div class="shield-inner">
+              <div class="shield-core"><i class="bi bi-shield-lock-fill"></i></div>
+              <div class="orbit orbit-1"><div class="orbit-dot"></div></div>
+              <div class="orbit orbit-2"><div class="orbit-dot"></div></div>
+              <div class="orbit orbit-3"><div class="orbit-dot"></div></div>
+            </div></div>
+          </div>
+          <div class="float-card fc-1"><i class="bi bi-cpu-fill neon-green"></i><span>Entropy: 87.4 bits</span></div>
+          <div class="float-card fc-2"><i class="bi bi-clock-fill neon-cyan"></i><span>Crack: 4 centuries</span></div>
+          <div class="float-card fc-3"><i class="bi bi-award-fill neon-purple"></i><span>Grade: A+</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section py-5" id="features">
+  <div class="container py-5">
+    <div class="text-center mb-5">
+      <span class="section-eyebrow">What We Analyze</span>
+      <h2 class="section-title mt-2">Enterprise-Grade <span class="neon-green">Security Analysis</span></h2>
+      <p class="section-subtitle">Every dimension of your password's security, measured and explained.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4"><div class="feature-card"><div class="feature-icon" style="--icon-color:#00ff88"><i class="bi bi-speedometer2"></i></div><h3 class="feature-title">Strength Scoring</h3><p class="feature-desc">0–100 security score with letter grades (F to A+) based on 12+ weighted security criteria, calculated in real time.</p><div class="feature-tag">Real-time</div></div></div>
+      <div class="col-md-6 col-lg-4"><div class="feature-card"><div class="feature-icon" style="--icon-color:#00d4ff"><i class="bi bi-calculator"></i></div><h3 class="feature-title">Entropy Calculation</h3><p class="feature-desc">Shannon entropy formula H = L × log₂(R) reveals the true mathematical randomness and unpredictability of your password.</p><div class="feature-tag">Mathematical</div></div></div>
+      <div class="col-md-6 col-lg-4"><div class="feature-card"><div class="feature-icon" style="--icon-color:#b347ff"><i class="bi bi-clock-history"></i></div><h3 class="feature-title">Crack Time Estimation</h3><p class="feature-desc">Simulates Online, Offline, GPU-accelerated, and Dictionary attacks to estimate real-world resistance time.</p><div class="feature-tag">Multi-vector</div></div></div>
+      <div class="col-md-6 col-lg-4"><div class="feature-card"><div class="feature-icon" style="--icon-color:#ff6b35"><i class="bi bi-book-half"></i></div><h3 class="feature-title">Dictionary Detection</h3><p class="feature-desc">Checks against 10M+ common passwords, dictionary words, and previously leaked credential databases.</p><div class="feature-tag">10M+ passwords</div></div></div>
+      <div class="col-md-6 col-lg-4"><div class="feature-card"><div class="feature-icon" style="--icon-color:#ffd700"><i class="bi bi-bar-chart-fill"></i></div><h3 class="feature-title">Radar Visualization</h3><p class="feature-desc">Interactive Chart.js radar showing 5 security dimensions: Length, Complexity, Entropy, Uniqueness, Resistance.</p><div class="feature-tag">Interactive</div></div></div>
+      <div class="col-md-6 col-lg-4"><div class="feature-card"><div class="feature-icon" style="--icon-color:#00ff88"><i class="bi bi-file-earmark-pdf-fill"></i></div><h3 class="feature-title">PDF Security Report</h3><p class="feature-desc">Download a professional cybersecurity report with your full analysis, security grade, and personalized recommendations.</p><div class="feature-tag">Exportable</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section py-5" id="how-it-works">
+  <div class="container py-5">
+    <div class="text-center mb-5">
+      <span class="section-eyebrow">The Process</span>
+      <h2 class="section-title mt-2">How <span class="neon-cyan">CyberShield</span> Works</h2>
+    </div>
+    <div class="row justify-content-center"><div class="col-lg-7">
+      <div class="timeline">
+        <div class="timeline-item"><div class="timeline-num">01</div><div class="timeline-content"><h4>Enter Your Password</h4><p>Type any password. All analysis runs locally in JavaScript — your password is never transmitted to any server.</p></div></div>
+        <div class="timeline-item"><div class="timeline-num">02</div><div class="timeline-content"><h4>12-Point Security Scan</h4><p>Our engine checks length, character diversity, keyboard patterns, sequential numbers, dictionary words, repeated characters, and more.</p></div></div>
+        <div class="timeline-item"><div class="timeline-num">03</div><div class="timeline-content"><h4>Entropy & Crack Time</h4><p>Shannon entropy formula calculates true randomness. Four attack vectors simulate real-world crack time estimates.</p></div></div>
+        <div class="timeline-item"><div class="timeline-num">04</div><div class="timeline-content"><h4>Dashboard + PDF Report</h4><p>Interactive dashboard with radar chart, strength meter, character analysis, and downloadable PDF report.</p></div></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about-section py-5" id="about">
+  <div class="container py-5">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="section-eyebrow">About This Project</span>
+        <h2 class="section-title mt-2">Built for <span class="neon-green">Cybersecurity</span> Professionals</h2>
+        <p class="text-muted-light mt-3">CyberShield demonstrates full-stack cybersecurity application development combining frontend engineering, Java Spring Boot REST APIs, MySQL database design, and real security algorithms.</p>
+        <div class="tech-stack mt-4">
+          <div class="tech-badge"><i class="bi bi-filetype-html"></i> HTML5</div>
+          <div class="tech-badge"><i class="bi bi-filetype-css"></i> CSS3</div>
+          <div class="tech-badge"><i class="bi bi-filetype-js"></i> JavaScript</div>
+          <div class="tech-badge"><i class="bi bi-bootstrap-fill"></i> Bootstrap 5</div>
+          <div class="tech-badge"><i class="bi bi-cup-hot-fill"></i> Java 17</div>
+          <div class="tech-badge"><i class="bi bi-database-fill"></i> MySQL</div>
+          <div class="tech-badge"><i class="bi bi-git"></i> Git</div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="about-terminal">
+          <div class="terminal-bar"><span class="t-dot red"></span><span class="t-dot yellow"></span><span class="t-dot green"></span><span class="t-title">cybershield_analysis.log</span></div>
+          <div class="terminal-body">
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">cybershield --analyze</span></div>
+            <div class="t-line t-info">[INFO] Initializing CyberShield Engine v2.0...</div>
+            <div class="t-line t-info">[INFO] Loading password database (10M entries)...</div>
+            <div class="t-line t-success">[OK] Engine ready. Awaiting input.</div>
+            <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">analyze --password "***"</span></div>
+            <div class="t-line t-info">[SCAN] Checking length.......... ✓ 14 chars</div>
+            <div class="t-line t-info">[SCAN] Checking uppercase...... ✓ Present</div>
+            <div class="t-line t-info">[SCAN] Checking symbols........ ✓ Present</div>
+            <div class="t-line t-info">[CALC] Computing entropy........ 87.4 bits</div>
+            <div class="t-line t-success">[RESULT] Score: 94/100 | Grade: A+</div>
+            <div class="t-line t-success">[RESULT] Online attack: 4 centuries</div>
+            <div class="t-cursor">█</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section py-5">
+  <div class="container py-4">
+    <div class="cta-card text-center">
+      <h2 class="cta-title">Ready to Test Your Password?</h2>
+      <p class="cta-subtitle">Get your complete security report in seconds. Free, private, no account needed.</p>
+      <button onclick="showPage('analyzer')" class="btn cs-btn-primary btn-lg mt-3"><i class="bi bi-shield-lock-fill me-2"></i>Launch Password Analyzer</button>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section py-5" id="contact">
+  <div class="container py-5">
+    <div class="text-center mb-5"><span class="section-eyebrow">Get In Touch</span><h2 class="section-title mt-2">Contact <span class="neon-green">Us</span></h2></div>
+    <div class="row justify-content-center"><div class="col-lg-6">
+      <div class="glass-card p-4">
+        <div class="mb-3"><label class="form-label cs-label">Your Name</label><input type="text" class="form-control cs-input" placeholder="John Doe"/></div>
+        <div class="mb-3"><label class="form-label cs-label">Email Address</label><input type="email" class="form-control cs-input" placeholder="john@example.com"/></div>
+        <div class="mb-3"><label class="form-label cs-label">Message</label><textarea class="form-control cs-input" rows="4" placeholder="Your message..."></textarea></div>
+        <button class="btn cs-btn-primary w-100"><i class="bi bi-send-fill me-2"></i>Send Message</button>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="cs-footer py-4">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+        <span class="brand-text">🛡️ Cyber<span class="neon-green">Shield</span></span>
+        <p class="footer-sub mt-1 mb-0">Professional Password Security Analyzer</p>
+      </div>
+      <div class="col-md-6 text-center text-md-end">
+        <span class="footer-sub">Built with ❤️ by SHRUTHIHAN &nbsp;|&nbsp; Cybersecurity Portfolio Project 2024</span>
+      </div>
+    </div>
+  </div>
+</footer>
+</div><!-- end page-landing -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ANALYZER PAGE
+════════════════════════════════════════════════════════════════ -->
+<div id="page-analyzer" style="display:none">
+<nav class="navbar cs-navbar fixed-top">
+  <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+    <button class="navbar-brand btn p-0 border-0 bg-transparent d-flex align-items-center gap-2" onclick="showPage('landing')">
+      <span style="font-size:1.2rem">🛡️</span><span class="brand-text">Cyber<span class="neon-green">Shield</span></span>
+    </button>
+    <div class="d-flex align-items-center gap-3">
+      <span class="nav-badge"><i class="bi bi-circle-fill text-success me-1" style="font-size:7px"></i>Analyzer Active</span>
+      <button onclick="showPage('landing')" class="btn cs-btn-outline btn-sm"><i class="bi bi-arrow-left me-1"></i>Home</button>
+    </div>
+  </div>
+</nav>
+
+<div class="analyzer-wrapper">
+  <div class="container-fluid px-3 px-md-4">
+    <div class="text-center mb-4">
+      <h1 class="analyzer-page-title">Password <span class="neon-green">Security</span> Analyzer</h1>
+      <p class="analyzer-page-sub">Enter a password below for a complete cybersecurity assessment</p>
+    </div>
+
+    <!-- INPUT -->
+    <div class="row justify-content-center mb-4">
+      <div class="col-lg-8">
+        <div class="glass-card p-4" style="border-color:rgba(0,255,136,.2)">
+          <label class="cs-label mb-2 d-block"><i class="bi bi-key-fill me-2 neon-green"></i>Enter Password to Analyze</label>
+          <div class="password-input-group">
+            <input type="password" id="passwordInput" class="form-control cs-input cs-input-lg" placeholder="Type your password here..." autocomplete="off" spellcheck="false"/>
+            <button class="btn cs-btn-icon" id="toggleVisibility"><i class="bi bi-eye-fill" id="eyeIcon"></i></button>
+            <button class="btn cs-btn-primary px-4" id="analyzeBtn"><i class="bi bi-shield-lock-fill me-2"></i>Analyze</button>
+          </div>
+          <div class="d-flex align-items-center justify-content-between mt-3 flex-wrap gap-2">
+            <div class="privacy-note"><i class="bi bi-lock-fill neon-green me-1"></i><small>Your password never leaves your browser. 100% private.</small></div>
+            <button class="btn btn-sm cs-btn-ghost" id="clearBtn"><i class="bi bi-x-circle me-1"></i>Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STRENGTH METER -->
+    <div class="row justify-content-center mb-4" id="meterSection" style="display:none!important">
+      <div class="col-lg-8">
+        <div class="glass-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="cs-label"><i class="bi bi-activity me-2"></i>Password Strength</span>
+            <span id="strengthLabel" class="strength-label-badge">—</span>
+          </div>
+          <div class="cs-meter-track"><div class="cs-meter-fill" id="meterFill" style="width:0%"></div></div>
+          <div class="meter-ticks"><span>Weak</span><span>Fair</span><span>Good</span><span>Strong</span><span>Excellent</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS DASHBOARD -->
+    <div id="resultsDashboard" style="display:none">
+      <!-- Metric Cards -->
+      <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3"><div class="glass-card metric-card text-center p-3 h-100"><div class="metric-icon" style="color:#00ff88"><i class="bi bi-speedometer2"></i></div><div class="metric-label">Security Score</div><div class="metric-value neon-green" id="scoreValue">—</div><div class="metric-sub">/100</div></div></div>
+        <div class="col-6 col-lg-3"><div class="glass-card metric-card text-center p-3 h-100"><div class="metric-icon" style="color:#b347ff"><i class="bi bi-award-fill"></i></div><div class="metric-label">Security Grade</div><div class="grade-display" id="gradeValue">—</div><div class="metric-sub" id="gradeDesc">—</div></div></div>
+        <div class="col-6 col-lg-3"><div class="glass-card metric-card text-center p-3 h-100"><div class="metric-icon" style="color:#00d4ff"><i class="bi bi-calculator"></i></div><div class="metric-label">Entropy</div><div class="metric-value neon-cyan" id="entropyValue">—</div><div class="metric-sub">bits</div></div></div>
+        <div class="col-6 col-lg-3"><div class="glass-card metric-card text-center p-3 h-100"><div class="metric-icon" style="color:#ffd700"><i class="bi bi-rulers"></i></div><div class="metric-label">Length</div><div class="metric-value" style="color:#ffd700" id="lengthValue">—</div><div class="metric-sub">characters</div></div></div>
+      </div>
+
+      <!-- Radar + Char Analysis -->
+      <div class="row g-3 mb-3">
+        <div class="col-lg-6"><div class="glass-card p-4 h-100"><div class="card-section-title mb-3"><i class="bi bi-bar-chart-fill neon-green me-2"></i>Security Radar</div><div class="radar-container"><canvas id="radarChart"></canvas></div></div></div>
+        <div class="col-lg-6"><div class="glass-card p-4 h-100">
+          <div class="card-section-title mb-3"><i class="bi bi-grid-3x3-gap-fill neon-cyan me-2"></i>Character Analysis</div>
+          <div class="char-analysis">
+            <div class="char-row"><div class="char-type"><i class="bi bi-arrow-up-circle"></i>Uppercase</div><div class="char-bar-wrap"><div class="char-bar" id="upperBar"></div></div><div class="char-count" id="upperCount">0</div></div>
+            <div class="char-row"><div class="char-type"><i class="bi bi-arrow-down-circle"></i>Lowercase</div><div class="char-bar-wrap"><div class="char-bar" id="lowerBar"></div></div><div class="char-count" id="lowerCount">0</div></div>
+            <div class="char-row"><div class="char-type"><i class="bi bi-hash"></i>Numbers</div><div class="char-bar-wrap"><div class="char-bar" id="numberBar"></div></div><div class="char-count" id="numberCount">0</div></div>
+            <div class="char-row"><div class="char-type"><i class="bi bi-asterisk"></i>Symbols</div><div class="char-bar-wrap"><div class="char-bar" id="symbolBar"></div></div><div class="char-count" id="symbolCount">0</div></div>
+          </div>
+          <div class="mt-3 p-3 info-box">
+            <div class="d-flex justify-content-between"><span class="cs-label-sm">Character Pool</span><span class="neon-green fw-bold" id="charPool">0</span></div>
+            <div class="d-flex justify-content-between mt-1"><span class="cs-label-sm">Combinations</span><span class="neon-cyan fw-bold" id="combinations">—</span></div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- Crack Time + Entropy -->
+      <div class="row g-3 mb-3">
+        <div class="col-lg-6"><div class="glass-card p-4 h-100">
+          <div class="card-section-title mb-3"><i class="bi bi-clock-history" style="color:#ff6b35"></i>&nbsp;Crack Time Estimation</div>
+          <div class="crack-grid">
+            <div class="crack-item"><div class="crack-attack"><i class="bi bi-globe"></i>Online Attack</div><div class="crack-desc">1,000 guesses/sec</div><div class="crack-time" id="onlineCrack">—</div></div>
+            <div class="crack-item"><div class="crack-attack"><i class="bi bi-hdd-fill"></i>Offline Attack</div><div class="crack-desc">1 Billion/sec</div><div class="crack-time" id="offlineCrack">—</div></div>
+            <div class="crack-item"><div class="crack-attack"><i class="bi bi-gpu-card"></i>GPU Attack</div><div class="crack-desc">100 Billion/sec</div><div class="crack-time" id="gpuCrack">—</div></div>
+            <div class="crack-item"><div class="crack-attack"><i class="bi bi-book"></i>Dictionary</div><div class="crack-desc">Pattern-based</div><div class="crack-time" id="dictCrack">—</div></div>
+          </div>
+        </div></div>
+        <div class="col-lg-6"><div class="glass-card p-4 h-100">
+          <div class="card-section-title mb-3"><i class="bi bi-calculator neon-cyan me-2"></i>Entropy Analysis</div>
+          <div class="entropy-formula p-3 mb-3"><div class="formula-title">Shannon Entropy Formula</div><div class="formula-text">H = L × log₂(R)</div><div class="formula-desc">H = Entropy bits &nbsp;|&nbsp; L = Length &nbsp;|&nbsp; R = Character pool</div></div>
+          <div class="entropy-breakdown">
+            <div class="eb-row"><span>Password Length (L)</span><span class="neon-green" id="ebLength">—</span></div>
+            <div class="eb-row"><span>Character Pool (R)</span><span class="neon-cyan" id="ebPool">—</span></div>
+            <div class="eb-row"><span>Entropy (H)</span><span class="neon-purple" id="ebEntropy">— bits</span></div>
+            <div class="eb-row"><span>Risk Level</span><span id="ebRisk" class="risk-badge">—</span></div>
+            <div class="eb-row"><span>Meaning</span><span id="ebMeaning" class="text-muted-light">—</span></div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- Checks + Recommendations -->
+      <div class="row g-3 mb-3">
+        <div class="col-lg-6"><div class="glass-card p-4 h-100"><div class="card-section-title mb-3"><i class="bi bi-list-check neon-green me-2"></i>Security Checks</div><div id="securityChecks" class="checks-list"></div></div></div>
+        <div class="col-lg-6"><div class="glass-card p-4 h-100"><div class="card-section-title mb-3"><i class="bi bi-lightbulb-fill" style="color:#ffd700"></i>&nbsp;Recommendations</div><div id="recommendations" class="recs-list"></div></div></div>
+      </div>
+
+      <!-- PDF Report -->
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+          <div class="glass-card p-4 text-center">
+            <h5 class="neon-green mb-1"><i class="bi bi-file-earmark-pdf-fill me-2"></i>Cybersecurity Report</h5>
+            <p class="text-muted-light mb-3">Download your complete password security analysis as a professional PDF.</p>
+            <button class="btn cs-btn-primary btn-lg" id="downloadPDF"><i class="bi bi-download me-2"></i>Download PDF Report</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /resultsDashboard -->
+
+    <!-- EMPTY STATE -->
+    <div id="emptyState" class="text-center py-5">
+      <div class="empty-shield mb-3">🛡️</div>
+      <h3 class="text-muted-light">Enter a password above to begin your security analysis</h3>
+      <p class="text-muted-light opacity-50 mt-2">Results appear instantly as you type</p>
+    </div>
+  </div>
+</div>
+</div><!-- /page-analyzer -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+'use strict';
+/* ═══ PAGE ROUTER ═══ */
+function showPage(page){
+  document.getElementById('page-landing').style.display  = page==='landing'  ? '' : 'none';
+  document.getElementById('page-analyzer').style.display = page==='analyzer' ? '' : 'none';
+  window.scrollTo(0,0);
+  if(page==='analyzer') setTimeout(()=>{ const inp=document.getElementById('passwordInput'); if(inp) inp.focus(); },200);
+}
+
+/* ═══ PARTICLE SYSTEM ═══ */
+(function(){
+  const canvas=document.getElementById('particle-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let W,H,particles=[];
+  function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+  window.addEventListener('resize',resize); resize();
+  class P{
+    constructor(){ this.reset(); }
+    reset(){ this.x=Math.random()*W; this.y=Math.random()*H; this.vx=(Math.random()-.5)*.3; this.vy=-Math.random()*.5-.1; this.r=Math.random()*1.5+.5; this.alpha=Math.random()*.4+.1; this.color=Math.random()>.7?'0,212,255':Math.random()>.5?'179,71,255':'0,255,136'; }
+    update(){ this.x+=this.vx; this.y+=this.vy; this.alpha-=.0008; if(this.y<-10||this.alpha<=0)this.reset(); }
+    draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2); ctx.fillStyle=`rgba(${this.color},${this.alpha})`; ctx.fill(); }
+  }
+  for(let i=0;i<80;i++) particles.push(new P());
+  function animate(){ ctx.clearRect(0,0,W,H); particles.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animate); }
+  animate();
+})();
+
+/* ═══ NAVBAR SCROLL ═══ */
+(function(){
+  const nav=document.querySelector('.cs-navbar');
+  if(!nav)return;
+  window.addEventListener('scroll',()=>{
+    nav.style.background=window.scrollY>50?'rgba(5,10,15,.97)':'rgba(5,10,15,.88)';
+    nav.style.boxShadow=window.scrollY>50?'0 4px 30px rgba(0,0,0,.5)':'none';
+  });
+})();
+
+/* ═══ SMOOTH SCROLL ═══ */
+document.querySelectorAll('a[href^="#"]').forEach(l=>{
+  l.addEventListener('click',e=>{
+    const t=document.querySelector(l.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}
+  });
+});
+
+/* ═══ SCROLL REVEAL ═══ */
+(function(){
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';} });
+  },{threshold:.1});
+  document.querySelectorAll('.feature-card,.timeline-item').forEach(el=>{
+    el.style.opacity='0'; el.style.transform='translateY(20px)'; el.style.transition='opacity .5s ease,transform .5s ease'; obs.observe(el);
+  });
+})();
+
+/* ═══ PASSWORD ANALYSIS ENGINE ═══ */
+const COMMON_PASSWORDS=new Set(['password','123456','123456789','qwerty','abc123','password1','111111','12345678','iloveyou','admin','letmein','monkey','1234567','sunshine','master','123123','welcome','shadow','football','superman','hello','charlie','donald','qwerty123','dragon','baseball','soccer','hockey','passw0rd','hunter','buster','thunder','summer','trustno1','starwars','login','admin123','root','test','guest','pass123','letmein1','monkey1','shadow1','dragon1','1234','12345','123456','0000','1111','1234567890','password123','abc','qwe','asd','zxc']);
+const KEYBOARD_PATS=['qwerty','qwertyuiop','asdfgh','asdfghjkl','zxcvbn','zxcvbnm','1234567890','qweasdzxc','qazwsx','abcdef','abcdefgh','zyxwvuts'];
+const SEQ_NUMS=['0123','1234','2345','3456','4567','5678','6789','7890','9876','8765','7654','6543','5432','4321','3210'];
+const SEQ_LETS=['abcd','bcde','cdef','defg','efgh','fghi','ghij','hijk','ijkl','jklm','klmn','lmno','mnop','nopq','opqr','pqrs','qrst','rstu','stuv','tuvw','uvwx','vwxy','wxyz'];
+
+function analyzePassword(password){
+  if(!password||!password.length)return null;
+  const r={password,length:password.length,score:0,grade:'F',entropy:0,charPool:0,combinations:0,checks:{},charCounts:{},crackTimes:{},recommendations:[],radarScores:{}};
+  const upper=(password.match(/[A-Z]/g)||[]).length;
+  const lower=(password.match(/[a-z]/g)||[]).length;
+  const numbers=(password.match(/[0-9]/g)||[]).length;
+  const symbols=(password.match(/[^A-Za-z0-9]/g)||[]).length;
+  r.charCounts={upper,lower,numbers,symbols};
+  let pool=0;
+  if(lower>0)pool+=26; if(upper>0)pool+=26; if(numbers>0)pool+=10; if(symbols>0)pool+=32;
+  r.charPool=pool;
+  const lp=password.toLowerCase();
+  const c=r.checks;
+  c.hasMinLength=password.length>=8;
+  c.hasGoodLength=password.length>=12;
+  c.hasExcellentLen=password.length>=16;
+  c.hasUppercase=upper>0;
+  c.hasLowercase=lower>0;
+  c.hasNumbers=numbers>0;
+  c.hasSymbols=symbols>0;
+  c.hasMultiSymbols=symbols>=2;
+  c.notCommonPassword=!COMMON_PASSWORDS.has(lp);
+  c.noKeyboardPattern=!KEYBOARD_PATS.some(p=>lp.includes(p));
+  c.noSequentialNumbers=!SEQ_NUMS.some(s=>lp.includes(s));
+  c.noSequentialLetters=!SEQ_LETS.some(s=>lp.includes(s));
+  c.noRepeatedChars=!/(.)\1{2,}/.test(password);
+  c.noDatePattern=!/(19|20)\d{2}/.test(password);
+  r.entropy=pool>0?parseFloat((password.length*Math.log2(pool)).toFixed(2)):0;
+  r.combinations=Math.pow(pool,password.length);
+  // Score
+  let s=0;
+  if(r.length>=6)s+=5; if(r.length>=8)s+=5; if(r.length>=10)s+=5; if(r.length>=12)s+=7; if(r.length>=16)s+=8;
+  if(c.hasUppercase)s+=7; if(c.hasLowercase)s+=7; if(c.hasNumbers)s+=7; if(c.hasSymbols)s+=7; if(c.hasMultiSymbols)s+=2;
+  if(r.entropy>=28)s+=5; if(r.entropy>=36)s+=5; if(r.entropy>=50)s+=5; if(r.entropy>=70)s+=5;
+  if(c.notCommonPassword)s+=8; if(c.noKeyboardPattern)s+=3; if(c.noSequentialNumbers)s+=2; if(c.noSequentialLetters)s+=2; if(c.noRepeatedChars)s+=3; if(c.noDatePattern)s+=2;
+  if(!c.hasMinLength)s-=15; if(!c.notCommonPassword)s-=30; if(!c.noKeyboardPattern)s-=10; if(!c.noRepeatedChars)s-=5;
+  r.score=Math.max(0,Math.min(100,Math.round(s)));
+  // Grade
+  if(r.score>=95)r.grade='A+'; else if(r.score>=85)r.grade='A'; else if(r.score>=75)r.grade='B'; else if(r.score>=60)r.grade='C'; else if(r.score>=40)r.grade='D'; else r.grade='F';
+  // Crack times
+  const avg=r.combinations/2;
+  r.crackTimes={online:fmtTime(avg/1e3),offline:fmtTime(avg/1e9),gpu:fmtTime(avg/1e11),dict:c.notCommonPassword?fmtTime(avg/1e6):'Instantly'};
+  // Radar
+  r.radarScores={length:Math.round(Math.min(100,(r.length/20)*100)),complexity:Math.round(((c.hasUppercase?1:0)+(c.hasLowercase?1:0)+(c.hasNumbers?1:0)+(c.hasSymbols?1:0))*25),entropy:Math.round(Math.min(100,(r.entropy/100)*100)),uniqueness:Math.max(0,100-(!c.notCommonPassword?60:0)-(!c.noKeyboardPattern?25:0)-(!c.noRepeatedChars?15:0)),resistance:r.score};
+  // Recs
+  const recs=[];
+  if(!c.hasGoodLength)recs.push({icon:'📏',text:'Use at least 12 characters — longer passwords are exponentially harder to crack.'});
+  if(!c.hasUppercase)recs.push({icon:'🔡',text:'Add uppercase letters (A-Z) to increase your character pool.'});
+  if(!c.hasLowercase)recs.push({icon:'🔤',text:'Include lowercase letters (a-z) for better character diversity.'});
+  if(!c.hasNumbers)recs.push({icon:'🔢',text:'Include numbers (0-9) to significantly increase combinations.'});
+  if(!c.hasSymbols)recs.push({icon:'🔣',text:'Add special characters (!@#$%^&*) for the strongest protection.'});
+  if(!c.noKeyboardPattern)recs.push({icon:'⌨️',text:"Avoid keyboard patterns like 'qwerty' — these are first in attacker wordlists."});
+  if(!c.notCommonPassword)recs.push({icon:'🚫',text:'This is a very common password! Change it immediately — it appears in all attacker databases.'});
+  if(!c.noRepeatedChars)recs.push({icon:'🔁',text:"Avoid repeating characters (e.g., 'aaa', '111')."});
+  if(!c.noDatePattern)recs.push({icon:'📅',text:'Remove birth years or dates — attackers always try common year patterns.'});
+  if(r.entropy<50)recs.push({icon:'📊',text:'Your entropy is below 50 bits. Add more character types and length.'});
+  recs.push({icon:'🔐',text:"Use a passphrase: combine 4+ random words (e.g., 'correct-horse-battery-staple')."});
+  recs.push({icon:'📱',text:'Enable Multi-Factor Authentication (MFA) — even a strong password can be phished.'});
+  recs.push({icon:'🔒',text:'Use a password manager (Bitwarden, 1Password) to generate and store unique passwords.'});
+  recs.push({icon:'♻️',text:'Never reuse this password across multiple sites.'});
+  r.recommendations=recs;
+  return r;
+}
+
+function fmtTime(sec){
+  if(!isFinite(sec)||sec>1e30)return'Heat death of universe';
+  if(sec<1)return'Less than 1 second';
+  if(sec<60)return Math.round(sec)+' seconds';
+  if(sec<3600)return Math.round(sec/60)+' minutes';
+  if(sec<86400)return Math.round(sec/3600)+' hours';
+  if(sec<2592000)return Math.round(sec/86400)+' days';
+  if(sec<31536000)return Math.round(sec/2592000)+' months';
+  const y=sec/31536000;
+  if(y<1000)return Math.round(y)+' years';
+  if(y<1e6)return(y/1000).toFixed(1)+'K years';
+  if(y<1e9)return(y/1e6).toFixed(1)+'M years';
+  return'Centuries';
+}
+
+function fmtCombinations(n){
+  if(!isFinite(n)||n>1e30)return'10^30+ (astronomical)';
+  if(n>=1e18)return(n/1e18).toFixed(1)+' Quintillion';
+  if(n>=1e12)return(n/1e12).toFixed(1)+' Trillion';
+  if(n>=1e9)return(n/1e9).toFixed(1)+' Billion';
+  if(n>=1e6)return(n/1e6).toFixed(1)+' Million';
+  return n.toLocaleString();
+}
+
+function getEntropyInfo(e){
+  if(e<28)return{risk:'CRITICAL',meaning:'Trivially crackable',color:'#ff4444'};
+  if(e<36)return{risk:'HIGH',meaning:'Crackable within hours',color:'#ff8800'};
+  if(e<50)return{risk:'MEDIUM',meaning:'May take days to crack',color:'#ffd700'};
+  if(e<70)return{risk:'LOW',meaning:'Would take years to crack',color:'#00d4ff'};
+  return{risk:'MINIMAL',meaning:'Practically uncrackable',color:'#00ff88'};
+}
+
+function getGradeDesc(g){return{A:'Excellent','A+':'Exceptional',B:'Good',C:'Fair',D:'Weak',F:'Critical'}[g]||'Unknown';}
+
+/* ═══ UI CONTROLLER ═══ */
+const $ = id => document.getElementById(id);
+let radarChart=null, lastResult=null;
+
+function setText(id,v){ const e=$(id); if(e)e.textContent=v; }
+function setBar(id,color,pct){ const e=$(id); if(e){e.style.width=Math.min(100,pct)+'%';e.style.background=color;e.style.boxShadow=`0 0 8px ${color}60`;} }
+
+function updateMeter(r){
+  const fill=$('meterFill'), lbl=$('strengthLabel'); if(!fill||!lbl)return;
+  const s=r.score;
+  fill.style.width=s+'%';
+  let label,color;
+  if(s<20){label='Critical';color='#ff4444';fill.style.background='linear-gradient(90deg,#ff2222,#ff4444)';}
+  else if(s<40){label='Weak';color='#ff8800';fill.style.background='linear-gradient(90deg,#ff4444,#ff8800)';}
+  else if(s<60){label='Fair';color='#ffd700';fill.style.background='linear-gradient(90deg,#ff8800,#ffd700)';}
+  else if(s<80){label='Good';color='#00d4ff';fill.style.background='linear-gradient(90deg,#ffd700,#00d4ff)';}
+  else if(s<95){label='Strong';color='#00ff88';fill.style.background='linear-gradient(90deg,#00d4ff,#00ff88)';}
+  else{label='Excellent';color='#00ff88';fill.style.background='linear-gradient(90deg,#00ff88,#00ffcc)';}
+  lbl.textContent=label; lbl.style.color=color; lbl.style.background=color+'18'; lbl.style.border=`1px solid ${color}40`;
+}
+
+function renderDashboard(r){
+  $('resultsDashboard').style.display=''; $('emptyState').style.display='none'; $('meterSection').style.display='';
+  updateMeter(r);
+  setText('scoreValue',r.score);
+  const gradeEl=$('gradeValue');
+  if(gradeEl){ const gc={'A+':'#00ff88','A':'#00d4ff','B':'#b347ff','C':'#ffd700','D':'#ff8800','F':'#ff4444'}; gradeEl.textContent=r.grade; gradeEl.style.cssText=`font-family:var(--font-display);font-size:2.8rem;font-weight:900;color:${gc[r.grade]||'#fff'}`; }
+  setText('gradeDesc',getGradeDesc(r.grade));
+  setText('entropyValue',r.entropy);
+  setText('lengthValue',r.length);
+  const t=r.length||1;
+  setBar('upperBar','#b347ff',(r.charCounts.upper/t)*100);
+  setBar('lowerBar','#00d4ff',(r.charCounts.lower/t)*100);
+  setBar('numberBar','#ffd700',(r.charCounts.numbers/t)*100);
+  setBar('symbolBar','#00ff88',(r.charCounts.symbols/t)*100);
+  setText('upperCount',r.charCounts.upper); setText('lowerCount',r.charCounts.lower);
+  setText('numberCount',r.charCounts.numbers); setText('symbolCount',r.charCounts.symbols);
+  setText('charPool',r.charPool+' chars'); setText('combinations',fmtCombinations(r.combinations));
+  setText('onlineCrack',r.crackTimes.online); setText('offlineCrack',r.crackTimes.offline);
+  setText('gpuCrack',r.crackTimes.gpu); setText('dictCrack',r.crackTimes.dict);
+  setText('ebLength',r.length); setText('ebPool',r.charPool); setText('ebEntropy',r.entropy+' bits');
+  const ei=getEntropyInfo(r.entropy);
+  const re=$('ebRisk');
+  if(re){ re.textContent=ei.risk; re.style.color=ei.color; re.style.background=ei.color+'18'; re.style.border=`1px solid ${ei.color}40`; re.style.padding='2px 8px'; re.style.borderRadius='4px'; }
+  setText('ebMeaning',ei.meaning);
+  // Checks
+  const chkEl=$('securityChecks');
+  if(chkEl){ const defs=[{k:'hasMinLength',l:'Minimum 8 characters'},{k:'hasGoodLength',l:'12+ characters (recommended)'},{k:'hasExcellentLen',l:'16+ characters (excellent)'},{k:'hasUppercase',l:'Contains uppercase letters'},{k:'hasLowercase',l:'Contains lowercase letters'},{k:'hasNumbers',l:'Contains numbers'},{k:'hasSymbols',l:'Contains special characters'},{k:'notCommonPassword',l:'Not a common password'},{k:'noKeyboardPattern',l:'No keyboard patterns (qwerty)'},{k:'noSequentialNumbers',l:'No sequential numbers (1234)'},{k:'noSequentialLetters',l:'No sequential letters (abcd)'},{k:'noRepeatedChars',l:'No repeated characters (aaa)'},{k:'noDatePattern',l:'No date patterns (1990, 2024)'}]; chkEl.innerHTML=defs.map(({k,l},i)=>`<div class="check-item ${r.checks[k]?'pass':'fail'}" style="animation-delay:${i*.04}s"><span class="check-icon ${r.checks[k]?'pass':'fail'}"><i class="bi bi-${r.checks[k]?'check-circle-fill':'x-circle-fill'}"></i></span><span>${l}</span></div>`).join(''); }
+  // Recs
+  const recEl=$('recommendations');
+  if(recEl){ recEl.innerHTML=r.recommendations.slice(0,7).map(({icon,text},i)=>`<div class="rec-item" style="animation-delay:${i*.05}s"><span class="rec-icon">${icon}</span><span>${text}</span></div>`).join(''); }
+  // Radar
+  updateRadar(r.radarScores);
+  lastResult=r;
+  $('resultsDashboard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function updateRadar(scores){
+  const canvas=$('radarChart');
+  if(!canvas||typeof Chart==='undefined')return;
+  const data=[scores.length,scores.complexity,scores.entropy,scores.uniqueness,scores.resistance];
+  if(radarChart){ radarChart.data.datasets[0].data=data; radarChart.update('active'); return; }
+  radarChart=new Chart(canvas,{
+    type:'radar',
+    data:{labels:['Length','Complexity','Entropy','Uniqueness','Resistance'],datasets:[{label:'Security Score',data,backgroundColor:'rgba(0,255,136,0.08)',borderColor:'rgba(0,255,136,0.9)',borderWidth:2,pointBackgroundColor:'rgba(0,255,136,1)',pointBorderColor:'#000',pointBorderWidth:2,pointRadius:5,pointHoverRadius:8,fill:true}]},
+    options:{animation:{duration:800,easing:'easeInOutQuart'},responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(5,10,20,.95)',borderColor:'rgba(0,255,136,.4)',borderWidth:1,titleColor:'#00ff88',bodyColor:'#e8f4fd',titleFont:{family:"'Orbitron',sans-serif",size:11},bodyFont:{family:"'Share Tech Mono',monospace",size:12},padding:12,callbacks:{label:ctx=>` Score: ${ctx.raw}/100`}}},scales:{r:{min:0,max:100,beginAtZero:true,ticks:{stepSize:20,color:'rgba(122,154,181,.5)',backdropColor:'transparent',font:{family:"'Share Tech Mono',monospace",size:9}},grid:{color:'rgba(0,255,136,.08)',lineWidth:1},angleLines:{color:'rgba(0,255,136,.12)',lineWidth:1},pointLabels:{color:'#e8f4fd',font:{family:"'Orbitron',sans-serif",size:10,weight:'700'},padding:12}}}}
+  });
+}
+
+/* ═══ EVENT LISTENERS ═══ */
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=$('passwordInput'), btn=$('analyzeBtn'), clr=$('clearBtn'), tog=$('toggleVisibility'), eye=$('eyeIcon');
+  if(!inp)return;
+  tog?.addEventListener('click',()=>{ const t=inp.type==='password'; inp.type=t?'text':'password'; eye.className=t?'bi bi-eye-slash-fill':'bi bi-eye-fill'; });
+  clr?.addEventListener('click',()=>{ inp.value=''; $('resultsDashboard').style.display='none'; $('emptyState').style.display=''; $('meterSection').style.display='none'; inp.focus(); });
+  inp.addEventListener('input',()=>{ const r=analyzePassword(inp.value); if(!inp.value){$('meterSection').style.display='none';return;} $('meterSection').style.display=''; updateMeter(r); });
+  btn?.addEventListener('click',()=>{ const r=analyzePassword(inp.value); if(r)renderDashboard(r); else{ inp.placeholder='⚠️ Please enter a password first...'; setTimeout(()=>inp.placeholder='Type your password here...',2000); } });
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter')btn.click(); });
+  $('downloadPDF')?.addEventListener('click',generatePDF);
+});
+
+/* ═══ PDF GENERATOR ═══ */
+function generatePDF(){
+  const r=lastResult;
+  if(!r){alert('Please analyze a password first!');return;}
+  if(typeof window.jspdf==='undefined'){alert('PDF library loading, please wait...');return;}
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,M=20;
+  let y=0;
+  const BLK=[5,10,20],GRN=[0,255,136],CYN=[0,212,255],PRP=[179,71,255],WHT=[232,244,253],GRY=[80,100,120],DRK=[15,30,50],RED=[255,68,68],ORG=[255,107,53],GLD=[255,215,0];
+  const gc={'A+':GRN,'A':CYN,'B':PRP,'C':GLD,'D':ORG,'F':RED};
+  const gradeColor=gc[r.grade]||WHT;
+  // Background
+  doc.setFillColor(...BLK); doc.rect(0,0,W,297,'F');
+  doc.setFillColor(...DRK); doc.rect(0,0,W,65,'F');
+  doc.setFillColor(...GRN); doc.rect(0,65,W,1.5,'F');
+  // Header
+  y=24; doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(...GRN); doc.text('CYBERSHIELD',W/2,y,{align:'center'});
+  y+=8; doc.setFontSize(12); doc.setTextColor(...WHT); doc.text('Password Security Analysis Report',W/2,y,{align:'center'});
+  y+=6; doc.setFontSize(8); doc.setTextColor(...GRY); doc.text(`Generated: ${new Date().toLocaleString()}`,W/2,y,{align:'center'});
+  // Grade box
+  y+=14;
+  doc.setFillColor(...gradeColor); doc.setDrawColor(...gradeColor); doc.roundedRect(W/2-28,y,56,34,5,5,'FD');
+  doc.setFillColor(...BLK); doc.roundedRect(W/2-26,y+2,52,30,4,4,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(26); doc.setTextColor(...gradeColor); doc.text(r.grade,W/2,y+21,{align:'center'});
+  doc.setFontSize(7); doc.setTextColor(...GRY); doc.text('SECURITY GRADE',W/2,y+28,{align:'center'});
+  y+=44;
+  // Metrics row
+  const cols=[{l:'STRENGTH SCORE',v:`${r.score}/100`,c:GRN},{l:'ENTROPY',v:`${r.entropy} bits`,c:CYN},{l:'LENGTH',v:`${r.length} chars`,c:PRP}];
+  const cW=(W-M*2)/3;
+  cols.forEach((col,i)=>{ const x=M+i*cW; doc.setFillColor(...DRK); doc.setDrawColor(...col.c); doc.roundedRect(x,y,cW-3,20,3,3,'FD'); doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...col.c); doc.text(col.v,x+(cW-3)/2,y+11,{align:'center'}); doc.setFontSize(6); doc.setTextColor(...GRY); doc.text(col.l,x+(cW-3)/2,y+17,{align:'center'}); });
+  y+=28;
+  // Section helper
+  function sec(title,color){doc.setFillColor(...color);doc.rect(M,y,3,8,'F');doc.setFillColor(...DRK);doc.rect(M+3,y,W-M*2-3,8,'F');doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...color);doc.text(title,M+7,y+5.5);y+=14;}
+  function row(k,v,vc){doc.setFillColor(...DRK);doc.rect(M,y,W-M*2,9,'F');doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...GRY);doc.text(k,M+4,y+5.5);doc.setFont('helvetica','bold');doc.setTextColor(...(vc||CYN));doc.text(String(v),W-M-4,y+5.5,{align:'right'});y+=11;}
+  // Crack times
+  sec('CRACK TIME ESTIMATION',GRN);
+  row('Online Attack (1K/sec)',r.crackTimes.online,CYN);
+  row('Offline Attack (1B/sec)',r.crackTimes.offline,ORG);
+  row('GPU Attack (100B/sec)',r.crackTimes.gpu,RED);
+  row('Dictionary Attack',r.crackTimes.dict,GLD);
+  y+=4;
+  // Entropy
+  sec('ENTROPY ANALYSIS',CYN);
+  const ei=getEntropyInfo(r.entropy);
+  row('Formula','H = L × log2(R)',WHT);
+  row('Password Length (L)',r.length,GRN);
+  row('Character Pool (R)',r.charPool,CYN);
+  row('Entropy (H)',`${r.entropy} bits`,PRP);
+  row('Risk Level',ei.risk,RED);
+  row('Assessment',ei.meaning,WHT);
+  y+=4;
+  if(y+60>285){doc.addPage();doc.setFillColor(...BLK);doc.rect(0,0,W,297,'F');y=20;}
+  // Char analysis
+  sec('CHARACTER ANALYSIS',PRP);
+  [{l:'Uppercase',n:r.charCounts.upper,c:PRP},{l:'Lowercase',n:r.charCounts.lower,c:CYN},{l:'Numbers',n:r.charCounts.numbers,c:GLD},{l:'Symbols',n:r.charCounts.symbols,c:GRN}].forEach(({l,n,c})=>{
+    const pct=r.length>0?n/r.length:0;
+    doc.setFillColor(...DRK);doc.rect(M,y,W-M*2,10,'F');
+    doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...GRY);doc.text(l,M+4,y+6.5);
+    const bx=M+55,bw=W-M*2-75;
+    doc.setFillColor(20,35,55);doc.rect(bx,y+3,bw,4,'F');
+    if(pct>0){doc.setFillColor(...c);doc.rect(bx,y+3,bw*pct,4,'F');}
+    doc.setFont('helvetica','bold');doc.setTextColor(...c);doc.text(`${n}`,W-M-4,y+6.5,{align:'right'});y+=12;
+  });
+  y+=4;
+  if(y+40>285){doc.addPage();doc.setFillColor(...BLK);doc.rect(0,0,W,297,'F');y=20;}
+  // Checks
+  sec('SECURITY CHECKS',GRN);
+  const chkDefs=[{l:'Minimum 8 characters',p:r.checks.hasMinLength},{l:'12+ characters',p:r.checks.hasGoodLength},{l:'16+ characters (excellent)',p:r.checks.hasExcellentLen},{l:'Contains uppercase',p:r.checks.hasUppercase},{l:'Contains lowercase',p:r.checks.hasLowercase},{l:'Contains numbers',p:r.checks.hasNumbers},{l:'Contains special chars',p:r.checks.hasSymbols},{l:'Not a common password',p:r.checks.notCommonPassword},{l:'No keyboard patterns',p:r.checks.noKeyboardPattern},{l:'No sequential numbers',p:r.checks.noSequentialNumbers},{l:'No repeated characters',p:r.checks.noRepeatedChars},{l:'No date patterns',p:r.checks.noDatePattern}];
+  chkDefs.forEach(({l,p})=>{
+    if(y+8>285){doc.addPage();doc.setFillColor(...BLK);doc.rect(0,0,W,297,'F');y=20;}
+    doc.setFillColor(...DRK);doc.rect(M,y,W-M*2,7.5,'F');
+    doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.setTextColor(...(p?GRN:RED));doc.text(p?'✓':'✗',M+4,y+5);
+    doc.setFont('helvetica','normal');doc.setTextColor(...WHT);doc.text(l,M+12,y+5);y+=9;
+  });
+  y+=4;
+  if(y+20>285){doc.addPage();doc.setFillColor(...BLK);doc.rect(0,0,W,297,'F');y=20;}
+  // Recommendations
+  sec('SECURITY RECOMMENDATIONS',GLD);
+  r.recommendations.forEach(({text},i)=>{
+    if(y+14>285){doc.addPage();doc.setFillColor(...BLK);doc.rect(0,0,W,297,'F');y=20;}
+    doc.setFillColor(15,28,45);doc.setDrawColor(...GLD);doc.rect(M,y,W-M*2,12,'FD');
+    doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...GLD);doc.text(`${i+1}.`,M+4,y+7.5);
+    doc.setFont('helvetica','normal');doc.setTextColor(...WHT);
+    const lines=doc.splitTextToSize(text,W-M*2-16);
+    doc.text(lines[0],M+10,y+7.5);y+=14;
+  });
+  // Footer
+  const tp=doc.internal.getNumberOfPages();
+  for(let pg=1;pg<=tp;pg++){doc.setPage(pg);doc.setFillColor(...DRK);doc.rect(0,285,W,12,'F');doc.setFillColor(...GRN);doc.rect(0,285,W,.5,'F');doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(...GRY);doc.text('CyberShield Password Security Analyzer — Confidential Report',M,291);doc.text(`Page ${pg} of ${tp}`,W-M,291,{align:'right'});}
+  doc.save(`CyberShield_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+}
+</script>
+</body>
+</html>

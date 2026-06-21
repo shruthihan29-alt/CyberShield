@@ -8,10 +8,6 @@
 
 ---
 
-## 🖥️ Preview
-
-![CyberShield Preview](https://shruthihan29-alt.github.io/CyberShield/)
-
 ---
 
 ## ✨ Features
